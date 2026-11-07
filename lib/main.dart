@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'providers/show_provider.dart';
+import 'providers/watchlist_provider.dart';
 import 'screens/main_shell.dart';
 import 'utils/app_constants.dart';
 import 'utils/app_theme.dart';
@@ -13,11 +16,17 @@ class CinemayApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppConstants.appName,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
-      home: const MainShell(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ShowProvider()..loadShows()),
+        ChangeNotifierProvider(create: (_) => WatchlistProvider()),
+      ],
+      child: MaterialApp(
+        title: AppConstants.appName,
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        home: const MainShell(),
+      ),
     );
   }
 }
