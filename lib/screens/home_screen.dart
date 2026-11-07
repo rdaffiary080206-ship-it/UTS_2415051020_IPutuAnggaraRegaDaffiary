@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_theme.dart';
 import '../utils/dummy_data.dart';
+import '../utils/responsive.dart';
 import '../widgets/poster_card.dart';
 import '../widgets/section_header.dart';
 
@@ -10,6 +11,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final itemWidth = Responsive.carouselItemWidth(context);
+    final isCompact = Responsive.isCompact(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -24,7 +27,7 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         children: [
           Container(
-            height: 220,
+            height: isCompact ? 220 : 320,
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: AppColors.surface,
@@ -35,7 +38,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SectionHeader(title: 'Sedang Trending'),
           SizedBox(
-            height: 210,
+            height: itemWidth * 1.6,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -44,7 +47,7 @@ class HomeScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final show = dummyShows[index];
                 return SizedBox(
-                  width: 130,
+                  width: itemWidth,
                   child: PosterCard(
                     title: show['title'] as String,
                     imageUrl: null,
