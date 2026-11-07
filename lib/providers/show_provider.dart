@@ -1,10 +1,14 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/show.dart';
-import '../utils/dummy_data.dart';
+import '../repositories/show_repository.dart';
 
 /// State katalog film/series: data, loading, dan error.
 class ShowProvider extends ChangeNotifier {
+  ShowProvider(this._repository);
+
+  final ShowRepository _repository;
+
   List<Show> _shows = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -34,8 +38,7 @@ class ShowProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await Future<void>.delayed(const Duration(milliseconds: 300));
-      _shows = dummyShowsJson.map(Show.fromJson).toList();
+      _shows = await _repository.getShows();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {

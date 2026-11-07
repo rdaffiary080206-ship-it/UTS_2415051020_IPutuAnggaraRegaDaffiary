@@ -19,6 +19,8 @@ class ExploreScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Eksplor')),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
+          : provider.errorMessage != null
+          ? Center(child: Text(provider.errorMessage!))
           : LayoutBuilder(
               builder: (context, constraints) {
                 final columns = Responsive.gridColumns(constraints.maxWidth);

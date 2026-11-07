@@ -38,6 +38,8 @@ class HomeScreen extends StatelessWidget {
       ),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
+          : provider.errorMessage != null
+          ? Center(child: Text(provider.errorMessage!))
           : ListView(
               children: [
                 Container(
