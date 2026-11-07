@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'screens/home_screen.dart';
 import 'utils/app_constants.dart';
 import 'utils/app_theme.dart';
 
@@ -16,9 +17,7 @@ class CinemayApp extends StatelessWidget {
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
-      home: const Scaffold(
-        body: Center(child: Text(AppConstants.appName)),
-      ),
+      home: const HomeScreen(),
     );
   }
 }
