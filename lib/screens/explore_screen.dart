@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../utils/dummy_data.dart';
 import '../utils/responsive.dart';
 import '../widgets/poster_card.dart';
+import 'detail_screen.dart';
 
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
@@ -30,6 +31,11 @@ class ExploreScreen extends StatelessWidget {
                 imageUrl: null,
                 rating: show['rating'] as double,
                 year: show['year'] as String,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => DetailScreen(show: show),
+                  ),
+                ),
               );
             },
           );

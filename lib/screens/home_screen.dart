@@ -5,9 +5,19 @@ import '../utils/dummy_data.dart';
 import '../utils/responsive.dart';
 import '../widgets/poster_card.dart';
 import '../widgets/section_header.dart';
+import 'detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onSeeAll});
+
+  /// Dipanggil saat "Lihat Semua" ditekan (pindah ke tab Eksplor).
+  final VoidCallback? onSeeAll;
+
+  void _openDetail(BuildContext context, Map<String, dynamic> show) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => DetailScreen(show: show)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +46,11 @@ class HomeScreen extends StatelessWidget {
             alignment: Alignment.center,
             child: const Text('Featured Banner'),
           ),
-          const SectionHeader(title: 'Sedang Trending'),
+          SectionHeader(
+            title: 'Sedang Trending',
+            actionLabel: 'Lihat Semua',
+            onAction: onSeeAll,
+          ),
           SizedBox(
             height: itemWidth * 1.6,
             child: ListView.separated(
@@ -53,6 +67,7 @@ class HomeScreen extends StatelessWidget {
                     imageUrl: null,
                     rating: show['rating'] as double,
                     year: show['year'] as String,
+                    onTap: () => _openDetail(context, show),
                   ),
                 );
               },
