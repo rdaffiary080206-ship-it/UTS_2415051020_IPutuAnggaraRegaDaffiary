@@ -40,11 +40,11 @@ class DetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: () => context.read<WatchlistProvider>().toggle(show),
-            icon: Icon(saved ? Icons.bookmark_remove : Icons.bookmark_add),
-            label: Text(saved ? 'Hapus dari Watchlist' : 'Tambah ke Watchlist'),
-          ),
+          if (saved)
+            const Chip(
+              avatar: Icon(Icons.bookmark, color: AppColors.primary),
+              label: Text('Tersimpan di Watchlist'),
+            ),
           const SizedBox(height: 16),
           Text(show.plainSummary),
         ],

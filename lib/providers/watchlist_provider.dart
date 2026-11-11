@@ -1,24 +1,45 @@
 import 'package:flutter/foundation.dart';
 
-import '../models/show.dart';
 import '../models/watchlist_item.dart';
+import '../repositories/watchlist_repository.dart';
 
-/// Shared state watchlist yang dipakai beberapa screen
+/// Shared state watchlist dari database, dipakai beberapa screen
 /// (Home, Detail, Watchlist, Profile).
 class WatchlistProvider extends ChangeNotifier {
-  final List<WatchlistItem> _items = [];
+  WatchlistProvider(this._repository);
+
+  final WatchlistRepository _repository;
+
+  List<WatchlistItem> _items = [];
+  bool _isLoading = false;
+  String? _errorMessage;
 
   List<WatchlistItem> get items => List.unmodifiable(_items);
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
   int get count => _items.length;
 
   bool isSaved(int showId) => _items.any((i) => i.showId == showId);
 
-  void toggle(Show show) {
-    if (isSaved(show.id)) {
-      _items.removeWhere((i) => i.showId == show.id);
-    } else {
-      _items.insert(0, WatchlistItem.fromShow(show));
+  WatchlistItem? findByShowId(int showId) {
+    for (final item in _items) {
+      if (item.showId == showId) return item;
     }
+    return null;
+  }
+
+  /// READ: memuat seluruh watchlist dari database.
+  Future<void> loadItems() async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+    try {
+      _items = await _repository.getAll();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }
