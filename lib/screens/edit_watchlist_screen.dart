@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/watchlist_item.dart';
 import '../providers/watchlist_provider.dart';
-import '../widgets/delete_watchlist_action.dart';
+import '../widgets/watchlist_actions.dart';
 import '../widgets/watchlist_form.dart';
 
 /// UPDATE: mengubah status, progres, rating, atau catatan watchlist.
