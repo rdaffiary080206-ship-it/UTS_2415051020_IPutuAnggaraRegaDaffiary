@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/watchlist_item.dart';
 import '../providers/watchlist_provider.dart';
 import '../utils/app_theme.dart';
+import '../widgets/delete_watchlist_action.dart';
 import '../widgets/watchlist_tile.dart';
 import 'add_watchlist_screen.dart';
 import 'edit_watchlist_screen.dart';
@@ -46,6 +47,7 @@ class WatchlistScreen extends StatelessWidget {
               item: item,
               onTap: () => _openEdit(context, item),
               onEdit: () => _openEdit(context, item),
+              onDelete: () => confirmAndDeleteWatchlistItem(context, item),
             );
           },
         ),

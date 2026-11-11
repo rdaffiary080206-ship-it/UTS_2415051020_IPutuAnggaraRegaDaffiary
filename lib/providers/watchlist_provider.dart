@@ -60,4 +60,13 @@ class WatchlistProvider extends ChangeNotifier {
     notifyListeners();
     return updated;
   }
+
+  /// DELETE: menghapus item dari database lalu dari state.
+  Future<void> remove(WatchlistItem item) async {
+    final id = item.id;
+    if (id == null) return;
+    await _repository.delete(id);
+    _items.removeWhere((i) => i.id == id);
+    notifyListeners();
+  }
 }

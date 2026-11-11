@@ -7,6 +7,7 @@ import 'package:cinemay/providers/watchlist_provider.dart';
 import 'package:cinemay/repositories/watchlist_repository.dart';
 import 'package:cinemay/screens/add_watchlist_screen.dart';
 import 'package:cinemay/screens/edit_watchlist_screen.dart';
+import 'package:cinemay/screens/watchlist_screen.dart';
 
 import 'fakes.dart';
 
@@ -70,5 +71,30 @@ void main() {
 
     expect(dataSource.rows.single['status'], 'completed');
     expect(provider.items.single.status, WatchStatus.completed);
+  });
+
+  testWidgets('Delete asks for confirmation first', (tester) async {
+    dataSource.rows.add({'id': 9, 'show_id': 2, 'title': 'Arrow'});
+    await provider.loadItems();
+
+    await pumpScreen(tester, const WatchlistScreen());
+    await tester.pumpAndSettle();
+
+    // Batal: data tetap ada.
+    await tester.tap(find.byTooltip('Hapus'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hapus dari Watchlist?'), findsOneWidget);
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+    expect(dataSource.rows, hasLength(1));
+
+    // Konfirmasi: data terhapus dari database dan state.
+    await tester.tap(find.byTooltip('Hapus'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Hapus'));
+    await tester.pumpAndSettle();
+    expect(dataSource.rows, isEmpty);
+    expect(provider.count, 0);
+    expect(find.text('"Arrow" dihapus dari watchlist'), findsOneWidget);
   });
 }

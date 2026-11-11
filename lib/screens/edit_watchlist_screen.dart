@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/watchlist_item.dart';
 import '../providers/watchlist_provider.dart';
+import '../widgets/delete_watchlist_action.dart';
 import '../widgets/watchlist_form.dart';
 
 /// UPDATE: mengubah status, progres, rating, atau catatan watchlist.
@@ -33,7 +34,21 @@ class EditWatchlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Watchlist')),
+      appBar: AppBar(
+        title: const Text('Edit Watchlist'),
+        actions: [
+          IconButton(
+            tooltip: 'Hapus',
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final deleted =
+                  await confirmAndDeleteWatchlistItem(context, item);
+              if (deleted) navigator.pop();
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
