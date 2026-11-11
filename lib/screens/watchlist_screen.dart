@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/watchlist_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/network_poster.dart';
+import 'add_watchlist_screen.dart';
 
 class WatchlistScreen extends StatelessWidget {
   const WatchlistScreen({super.key});
@@ -61,6 +62,15 @@ class WatchlistScreen extends StatelessWidget {
         ],
       ),
       body: body,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const AddWatchlistScreen()),
+        ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('Tambah'),
+      ),
     );
   }
 }

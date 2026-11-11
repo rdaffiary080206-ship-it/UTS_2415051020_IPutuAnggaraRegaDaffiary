@@ -6,6 +6,7 @@ import '../providers/watchlist_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/network_poster.dart';
 import '../widgets/rating_badge.dart';
+import 'add_watchlist_screen.dart';
 
 /// Detail film/series. Menerima objek [Show] dari screen sebelumnya.
 class DetailScreen extends StatelessWidget {
@@ -44,6 +45,16 @@ class DetailScreen extends StatelessWidget {
             const Chip(
               avatar: Icon(Icons.bookmark, color: AppColors.primary),
               label: Text('Tersimpan di Watchlist'),
+            )
+          else
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => AddWatchlistScreen(show: show),
+                ),
+              ),
+              icon: const Icon(Icons.bookmark_add_outlined),
+              label: const Text('Tambah ke Watchlist'),
             ),
           const SizedBox(height: 16),
           Text(show.plainSummary),

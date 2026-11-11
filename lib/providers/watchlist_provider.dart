@@ -42,4 +42,13 @@ class WatchlistProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// CREATE: menyimpan item baru ke database lalu menambahkannya ke state.
+  /// Error dilempar ulang agar UI dapat menampilkan pesan.
+  Future<WatchlistItem> add(WatchlistItem item) async {
+    final saved = await _repository.add(item);
+    _items.insert(0, saved);
+    notifyListeners();
+    return saved;
+  }
 }
