@@ -57,6 +57,38 @@ void main() {
     await pumpApp(tester);
     await tester.tap(find.byIcon(Icons.bookmark_border));
     await tester.pumpAndSettle();
-    expect(find.text('Sedang Ditonton'), findsOneWidget);
+    expect(find.text('Sedang Ditonton'), findsWidgets);
+  });
+
+  testWidgets('Home shows error state and retries on failure', (tester) async {
+    var shouldFail = true;
+    final flakyClient = MockClient((request) async {
+      if (shouldFail) {
+        return http.Response('Server error', 500);
+      }
+      return http.Response(
+        jsonEncode([
+          {'id': 2, 'name': 'Person of Interest', 'genres': ['Action']},
+        ]),
+        200,
+      );
+    });
+    final flakyRepo = ShowRepository(TvMazeService(client: flakyClient));
+
+    await tester.pumpWidget(
+      CinemayApp(
+        showRepository: flakyRepo,
+        watchlistRepository: watchlistRepo,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gagal Memuat Katalog'), findsOneWidget);
+
+    shouldFail = false;
+    await tester.tap(find.text('Coba Lagi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Person of Interest'), findsWidgets);
   });
 }

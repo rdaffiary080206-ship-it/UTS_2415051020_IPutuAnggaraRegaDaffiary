@@ -5,6 +5,7 @@ import '../models/watch_status.dart';
 import '../models/watchlist_item.dart';
 import '../providers/watchlist_provider.dart';
 import '../utils/app_theme.dart';
+import '../widgets/state_views.dart';
 import '../widgets/watchlist_actions.dart';
 import '../widgets/watchlist_tile.dart';
 import 'add_watchlist_screen.dart';
@@ -26,17 +27,28 @@ class WatchlistScreen extends StatelessWidget {
 
     Widget body;
     if (provider.isLoading) {
-      body = const Center(child: CircularProgressIndicator());
+      body = const LoadingStateView(message: 'Memuat watchlist dari database...');
     } else if (provider.errorMessage != null) {
-      body = Center(child: Text(provider.errorMessage!));
+      body = ErrorStateView(
+        title: 'Gagal Memuat Watchlist',
+        message: provider.errorMessage!,
+        onRetry: provider.loadItems,
+      );
     } else if (items.isEmpty) {
-      body = Center(
-        child: Text(
-          provider.count == 0
-              ? 'Watchlist masih kosong'
-              : 'Tidak ada judul dengan status ini',
-          style: const TextStyle(color: AppColors.textSecondary),
-        ),
+      body = EmptyStateView(
+        icon: Icons.bookmark_border_rounded,
+        title: provider.count == 0
+            ? 'Watchlist Masih Kosong'
+            : 'Tidak Ada Judul pada Status Ini',
+        subtitle: provider.count == 0
+            ? 'Tambahkan film atau series favoritmu dari Beranda/Eksplor atau lewat tombol Tambah.'
+            : 'Coba pilih filter status tontonan lainnya.',
+        actionLabel: provider.count == 0 ? 'Tambah Manual' : 'Tampilkan Semua',
+        onAction: provider.count == 0
+            ? () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AddWatchlistScreen()),
+                )
+            : () => provider.setStatusFilter(null),
       );
     } else {
       body = RefreshIndicator(

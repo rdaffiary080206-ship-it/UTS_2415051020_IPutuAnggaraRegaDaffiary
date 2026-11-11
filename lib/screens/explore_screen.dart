@@ -8,6 +8,7 @@ import '../utils/app_theme.dart';
 import '../utils/responsive.dart';
 import '../widgets/poster_card.dart';
 import '../widgets/show_list_tile.dart';
+import '../widgets/state_views.dart';
 import 'detail_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -110,18 +111,41 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildResults(ShowProvider provider) {
     if (provider.isLoading || provider.isSearching) {
-      return const Center(child: CircularProgressIndicator());
+      return LoadingStateView(
+        message: provider.isSearching
+            ? 'Mencari "${provider.query}"...'
+            : 'Memuat katalog...',
+      );
     }
     final error =
         provider.hasActiveSearch ? provider.searchError : provider.errorMessage;
     if (error != null) {
-      return Center(child: Text(error));
+      return ErrorStateView(
+        title: provider.hasActiveSearch
+            ? 'Pencarian Gagal'
+            : 'Gagal Memuat Katalog',
+        message: error,
+        onRetry: provider.hasActiveSearch
+            ? provider.retrySearch
+            : provider.loadShows,
+      );
     }
     final shows = provider.visibleShows;
     if (shows.isEmpty) {
-      return const Center(
-        child: Text('Tidak ada judul yang cocok.',
-            style: TextStyle(color: AppColors.textSecondary)),
+      return EmptyStateView(
+        icon: Icons.search_off_rounded,
+        title: 'Tidak Ada Judul yang Cocok',
+        subtitle: provider.hasActiveSearch
+            ? 'Coba kata kunci lain atau hapus filter genre.'
+            : 'Tidak ada tayangan pada genre ini.',
+        actionLabel: provider.selectedGenre != null || provider.hasActiveSearch
+            ? 'Reset Filter'
+            : null,
+        onAction: () {
+          _searchController.clear();
+          provider.clearSearch();
+          provider.selectGenre(null);
+        },
       );
     }
 
