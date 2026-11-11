@@ -3,23 +3,24 @@ import 'package:flutter/material.dart';
 import '../models/watch_status.dart';
 import '../models/watchlist_item.dart';
 import '../utils/app_theme.dart';
+import 'network_poster.dart';
 
-/// Form watchlist yang dipakai bersama oleh screen Tambah dan Edit.
-/// Melakukan validasi input lalu mengirim [WatchlistItem] lewat [onSubmit].
+/// Form watchlist untuk menyimpan atau memperbarui progress menonton,
+/// rating bintang, dan catatan/review pribadi.
 class WatchlistForm extends StatefulWidget {
   const WatchlistForm({
     super.key,
     required this.initial,
     required this.submitLabel,
     required this.onSubmit,
-    this.titleEditable = true,
+    this.titleEditable = false,
   });
 
   final WatchlistItem initial;
   final String submitLabel;
   final Future<void> Function(WatchlistItem item) onSubmit;
 
-  /// Judul dari API tidak perlu diubah; judul input manual boleh diubah.
+  /// Bernilai `false` jika film berasal dari API (judul & genre fix).
   final bool titleEditable;
 
   @override
@@ -29,12 +30,12 @@ class WatchlistForm extends StatefulWidget {
 class _WatchlistFormState extends State<WatchlistForm> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _title;
-  late final TextEditingController _genres;
   late final TextEditingController _progress;
   late final TextEditingController _note;
   late WatchStatus _status;
-  late bool _hasRating;
-  late double _rating;
+
+  /// Rating dalam skala 1–5 bintang (disimpan ke DB skala 2–10 agar kompatibel).
+  late int _stars;
   bool _submitting = false;
 
   static const int maxTitle = 200;
@@ -46,18 +47,17 @@ class _WatchlistFormState extends State<WatchlistForm> {
     super.initState();
     final item = widget.initial;
     _title = TextEditingController(text: item.title);
-    _genres = TextEditingController(text: item.genres);
     _progress = TextEditingController(text: item.progress);
     _note = TextEditingController(text: item.note);
     _status = item.status;
-    _hasRating = item.personalRating != null;
-    _rating = item.personalRating ?? 7;
+    _stars = item.personalRating == null
+        ? 0
+        : (item.personalRating! / 2).round().clamp(1, 5);
   }
 
   @override
   void dispose() {
     _title.dispose();
-    _genres.dispose();
     _progress.dispose();
     _note.dispose();
     super.dispose();
@@ -73,10 +73,10 @@ class _WatchlistFormState extends State<WatchlistForm> {
   String? _validateProgress(String? value) {
     final text = value?.trim() ?? '';
     if (_status == WatchStatus.watching && text.isEmpty) {
-      return 'Isi progres jika sedang ditonton (mis. S1 E5)';
+      return 'Isi progress menonton (contoh: Episode 5 / Menit 45)';
     }
     if (text.length > maxProgress) {
-      return 'Progres maksimal $maxProgress karakter';
+      return 'Progress maksimal $maxProgress karakter';
     }
     return null;
   }
@@ -84,9 +84,9 @@ class _WatchlistFormState extends State<WatchlistForm> {
   String? _validateNote(String? value) {
     final text = value?.trim() ?? '';
     if (text.isNotEmpty && text.length < 3) {
-      return 'Catatan minimal 3 karakter atau kosongkan';
+      return 'Review minimal 3 karakter atau kosongkan';
     }
-    if (text.length > maxNote) return 'Catatan maksimal $maxNote karakter';
+    if (text.length > maxNote) return 'Review maksimal $maxNote karakter';
     return null;
   }
 
@@ -98,11 +98,11 @@ class _WatchlistFormState extends State<WatchlistForm> {
     final item = WatchlistItem(
       id: base.id,
       showId: base.showId,
-      title: _title.text.trim(),
+      title: widget.titleEditable ? _title.text.trim() : base.title,
       posterUrl: base.posterUrl,
-      genres: _genres.text.trim(),
+      genres: base.genres,
       status: _status,
-      personalRating: _hasRating ? _rating : null,
+      personalRating: _stars == 0 ? null : (_stars * 2).toDouble(),
       progress: _progress.text.trim(),
       note: _note.text.trim(),
       createdAt: base.createdAt,
@@ -119,37 +119,35 @@ class _WatchlistFormState extends State<WatchlistForm> {
 
   @override
   Widget build(BuildContext context) {
+    final item = widget.initial;
     return Form(
       key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextFormField(
-            controller: _title,
-            enabled: widget.titleEditable,
-            maxLength: maxTitle,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Judul film / series *',
-              prefixIcon: Icon(Icons.movie_outlined),
+          // Header film (fix mengikuti API) atau input judul jika manual
+          if (!widget.titleEditable && item.title.isNotEmpty)
+            _LockedMovieHeader(item: item)
+          else
+            TextFormField(
+              controller: _title,
+              maxLength: maxTitle,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'Judul film / series *',
+                prefixIcon: Icon(Icons.movie_outlined),
+              ),
+              validator: _validateTitle,
             ),
-            validator: _validateTitle,
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _genres,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Genre',
-              hintText: 'mis. Drama, Thriller',
-              prefixIcon: Icon(Icons.category_outlined),
-            ),
-          ),
           const SizedBox(height: 20),
-          const Text('Status tontonan',
-              style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+
+          // Status tontonan
+          const Text(
+            'Status Tontonan',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -159,82 +157,170 @@ class _WatchlistFormState extends State<WatchlistForm> {
                   avatar: Icon(status.icon, size: 18),
                   label: Text(status.label),
                   selected: _status == status,
+                  showCheckmark: false,
                   selectedColor: AppColors.primary,
                   onSelected: (_) => setState(() => _status = status),
                 ),
             ],
           ),
           const SizedBox(height: 20),
+
+          // Progress menonton
+          const Text(
+            'Progress Menonton',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
+          const SizedBox(height: 8),
           TextFormField(
             controller: _progress,
             maxLength: maxProgress,
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
-              labelText: 'Progres terakhir',
-              hintText: 'mis. Season 1 Episode 5 / Menit 45',
-              prefixIcon: Icon(Icons.timelapse),
+              hintText: 'Contoh: Season 1 Episode 5 atau Menit 45',
+              prefixIcon: Icon(Icons.play_circle_outline),
+              counterText: '',
             ),
             validator: _validateProgress,
           ),
-          const SizedBox(height: 8),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Beri rating pribadi'),
-            value: _hasRating,
-            activeThumbColor: AppColors.primary,
-            onChanged: (v) => setState(() => _hasRating = v),
-          ),
-          if (_hasRating)
-            Row(
+          const SizedBox(height: 20),
+
+          // Bagian Rating Bintang (terpisah dari review)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.star_rounded, color: AppColors.gold),
-                Expanded(
-                  child: Slider(
-                    value: _rating,
-                    min: 1,
-                    max: 10,
-                    divisions: 18,
-                    label: _rating.toStringAsFixed(1),
-                    onChanged: (v) => setState(() => _rating = v),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Rating Kamu',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                    ),
+                    if (_stars > 0)
+                      TextButton(
+                        onPressed: () => setState(() => _stars = 0),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: const Text('Reset'),
+                      ),
+                  ],
                 ),
-                SizedBox(
-                  width: 48,
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var i = 1; i <= 5; i++)
+                      IconButton(
+                        onPressed: () => setState(() => _stars = i),
+                        iconSize: 36,
+                        icon: Icon(
+                          i <= _stars
+                              ? Icons.star_rounded
+                              : Icons.star_outline_rounded,
+                          color: i <= _stars
+                              ? AppColors.gold
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+                Center(
                   child: Text(
-                    _rating.toStringAsFixed(1),
-                    textAlign: TextAlign.end,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    _stars == 0
+                        ? 'Ketuk bintang untuk memberi rating'
+                        : '$_stars / 5 Bintang',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ],
             ),
-          const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 20),
+
+          // Bagian Review / Catatan Pribadi (terpisah)
+          const Text(
+            'Catatan / Review Pribadi',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
+          const SizedBox(height: 8),
           TextFormField(
             controller: _note,
             maxLength: maxNote,
             minLines: 3,
-            maxLines: 6,
+            maxLines: 5,
             decoration: const InputDecoration(
-              labelText: 'Catatan / review pribadi',
+              hintText: 'Tulis pendapat atau catatanmu tentang tayangan ini...',
               alignLabelWithHint: true,
             ),
             validator: _validateNote,
           ),
           const SizedBox(height: 16),
-          FilledButton.icon(
+          FilledButton(
             onPressed: _submitting ? null : _submit,
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            icon: _submitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
-                  )
-                : const Icon(Icons.save_outlined),
-            label: Text(_submitting ? 'Menyimpan...' : widget.submitLabel),
+            child: Text(_submitting ? 'Menyimpan...' : widget.submitLabel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Kartu informasi film yang terkunci (judul & genre fix mengikuti API).
+class _LockedMovieHeader extends StatelessWidget {
+  const _LockedMovieHeader({required this.item});
+
+  final WatchlistItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 56,
+            height: 80,
+            child: NetworkPoster(imageUrl: item.posterUrl, borderRadius: 8),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.genres.isEmpty ? 'Tanpa genre' : item.genres,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

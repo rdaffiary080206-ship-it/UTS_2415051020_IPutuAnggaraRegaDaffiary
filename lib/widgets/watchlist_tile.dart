@@ -92,12 +92,14 @@ class WatchlistTile extends StatelessWidget {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.star_rounded,
-                                  size: 16, color: AppColors.gold),
-                              Text(
-                                '${item.personalRating!.toStringAsFixed(1)}/10',
-                                style: const TextStyle(fontSize: 12),
-                              ),
+                              for (var i = 1; i <= 5; i++)
+                                Icon(
+                                  i <= (item.personalRating! / 2).round()
+                                      ? Icons.star_rounded
+                                      : Icons.star_outline_rounded,
+                                  size: 15,
+                                  color: AppColors.gold,
+                                ),
                             ],
                           ),
                       ],
@@ -105,7 +107,7 @@ class WatchlistTile extends StatelessWidget {
                     if (item.progress.isNotEmpty) ...[
                       const SizedBox(height: 6),
                       Text(
-                        'Progres: ${item.progress}',
+                        'Progress menonton: ${item.progress}',
                         style: const TextStyle(
                             color: AppColors.textSecondary, fontSize: 12),
                       ),

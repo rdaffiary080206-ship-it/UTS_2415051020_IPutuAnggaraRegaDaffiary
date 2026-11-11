@@ -167,8 +167,8 @@ class FeaturedBanner extends StatelessWidget {
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.gold,
                         ),
-                        icon: const Icon(Icons.casino_outlined),
-                        label: const Text('Kejutkan Saya'),
+                        icon: const Icon(Icons.shuffle_rounded),
+                        label: const Text('Random Movie'),
                       ),
                   ],
                 ),

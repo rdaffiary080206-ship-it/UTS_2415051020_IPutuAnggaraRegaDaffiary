@@ -26,8 +26,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// Fitur kreatif "Kejutkan Saya": memilih satu tayangan secara acak
-  /// dari katalog dan menampilkannya dalam dialog rekomendasi cepat.
+  /// Fitur "Random Movie": memilih satu tayangan secara acak
+  /// dari katalog dan menampilkannya dalam bottom sheet ringkas.
   void _surpriseMe(BuildContext context, List<Show> shows) {
     if (shows.isEmpty) return;
     final pick = shows[Random().nextInt(shows.length)];
@@ -45,11 +45,11 @@ class HomeScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.casino_rounded, color: AppColors.gold),
+                const Icon(Icons.shuffle_rounded, color: AppColors.gold),
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
-                    'Rekomendasi Acak Hari Ini',
+                    'Random Movie',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
@@ -130,9 +130,9 @@ class HomeScreen extends StatelessWidget {
         actions: [
           if (provider.shows.isNotEmpty)
             IconButton(
-              tooltip: 'Kejutkan Saya (Pilih Acak)',
+              tooltip: 'Random Movie',
               onPressed: () => _surpriseMe(context, provider.shows),
-              icon: const Icon(Icons.casino_outlined, color: AppColors.gold),
+              icon: const Icon(Icons.shuffle_rounded, color: AppColors.gold),
             ),
           if (onSeeAll != null)
             IconButton(

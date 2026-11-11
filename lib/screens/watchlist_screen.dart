@@ -8,7 +8,6 @@ import '../utils/app_theme.dart';
 import '../widgets/state_views.dart';
 import '../widgets/watchlist_actions.dart';
 import '../widgets/watchlist_tile.dart';
-import 'add_watchlist_screen.dart';
 import 'edit_watchlist_screen.dart';
 
 class WatchlistScreen extends StatelessWidget {
@@ -41,13 +40,11 @@ class WatchlistScreen extends StatelessWidget {
             ? 'Watchlist Masih Kosong'
             : 'Tidak Ada Judul pada Status Ini',
         subtitle: provider.count == 0
-            ? 'Tambahkan film atau series favoritmu dari Beranda/Eksplor atau lewat tombol Tambah.'
+            ? 'Pilih film atau series dari Beranda atau Eksplor untuk ditambahkan ke Watchlist.'
             : 'Coba pilih filter status tontonan lainnya.',
-        actionLabel: provider.count == 0 ? 'Tambah Manual' : 'Tampilkan Semua',
+        actionLabel: provider.count == 0 ? null : 'Tampilkan Semua',
         onAction: provider.count == 0
-            ? () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AddWatchlistScreen()),
-                )
+            ? null
             : () => provider.setStatusFilter(null),
       );
     } else {
@@ -121,15 +118,6 @@ class WatchlistScreen extends StatelessWidget {
           ),
           Expanded(child: body),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const AddWatchlistScreen()),
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Tambah'),
       ),
     );
   }
