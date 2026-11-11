@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/watchlist_item.dart';
 import '../providers/watchlist_provider.dart';
 import '../utils/app_theme.dart';
-import '../widgets/network_poster.dart';
+import '../widgets/watchlist_tile.dart';
 import 'add_watchlist_screen.dart';
+import 'edit_watchlist_screen.dart';
 
 class WatchlistScreen extends StatelessWidget {
   const WatchlistScreen({super.key});
+
+  void _openEdit(BuildContext context, WatchlistItem item) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => EditWatchlistScreen(item: item)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,16 +42,10 @@ class WatchlistScreen extends StatelessWidget {
           itemCount: items.length,
           itemBuilder: (context, index) {
             final item = items[index];
-            return Card(
-              child: ListTile(
-                leading: SizedBox(
-                  width: 44,
-                  child:
-                      NetworkPoster(imageUrl: item.posterUrl, borderRadius: 6),
-                ),
-                title: Text(item.title),
-                subtitle: Text(item.status.label),
-              ),
+            return WatchlistTile(
+              item: item,
+              onTap: () => _openEdit(context, item),
+              onEdit: () => _openEdit(context, item),
             );
           },
         ),

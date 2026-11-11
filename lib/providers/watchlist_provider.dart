@@ -51,4 +51,13 @@ class WatchlistProvider extends ChangeNotifier {
     notifyListeners();
     return saved;
   }
+
+  /// UPDATE: memperbarui item di database lalu mengganti item di state.
+  Future<WatchlistItem> update(WatchlistItem item) async {
+    final updated = await _repository.update(item);
+    final index = _items.indexWhere((i) => i.id == updated.id);
+    if (index != -1) _items[index] = updated;
+    notifyListeners();
+    return updated;
+  }
 }
