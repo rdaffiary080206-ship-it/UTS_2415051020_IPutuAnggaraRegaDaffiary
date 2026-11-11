@@ -154,7 +154,6 @@ class _WatchlistFormState extends State<WatchlistForm> {
             children: [
               for (final status in WatchStatus.values)
                 ChoiceChip(
-                  avatar: Icon(status.icon, size: 18),
                   label: Text(status.label),
                   selected: _status == status,
                   showCheckmark: false,

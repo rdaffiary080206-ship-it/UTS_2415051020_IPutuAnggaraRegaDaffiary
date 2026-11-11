@@ -23,14 +23,14 @@ class WatchlistTile extends StatelessWidget {
 
   static Color statusColor(WatchStatus status) {
     switch (status) {
+      case WatchStatus.favorite:
+        return AppColors.primary;
       case WatchStatus.planToWatch:
         return AppColors.info;
       case WatchStatus.watching:
         return AppColors.gold;
       case WatchStatus.completed:
         return AppColors.success;
-      case WatchStatus.dropped:
-        return AppColors.textSecondary;
     }
   }
 
@@ -77,15 +77,9 @@ class WatchlistTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(color: color),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(item.status.icon, size: 13, color: color),
-                              const SizedBox(width: 4),
-                              Text(item.status.label,
-                                  style:
-                                      TextStyle(color: color, fontSize: 12)),
-                            ],
+                          child: Text(
+                            item.status.label,
+                            style: TextStyle(color: color, fontSize: 12),
                           ),
                         ),
                         if (item.personalRating != null)

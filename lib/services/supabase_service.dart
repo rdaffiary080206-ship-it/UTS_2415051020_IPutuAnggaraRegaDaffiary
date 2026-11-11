@@ -62,6 +62,7 @@ class SupabaseService implements WatchlistDataSource {
   /// Mengubah error Supabase/jaringan menjadi [AppException].
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
+      await initialize();
       return await action();
     } on AppException {
       rethrow;

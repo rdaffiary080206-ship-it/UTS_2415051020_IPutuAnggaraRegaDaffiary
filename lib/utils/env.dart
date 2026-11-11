@@ -1,14 +1,18 @@
-/// Konfigurasi environment yang dibaca saat build melalui
-/// `--dart-define-from-file=env.json` (file env.json tidak di-commit).
-///
-/// Hanya berisi Supabase Project URL dan **publishable (anon) key**.
+/// Konfigurasi environment Supabase.
+/// Menggunakan publishable (anon) key yang aman untuk client + RLS.
 /// Jangan pernah mengisi secret / service_role key di sini.
 class Env {
   Env._();
 
-  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  static const String supabasePublishableKey =
-      String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://xmpcfjzbpecpmjcoarql.supabase.co',
+  );
+
+  static const String supabasePublishableKey = String.fromEnvironment(
+    'SUPABASE_PUBLISHABLE_KEY',
+    defaultValue: 'sb_publishable_6BKCZcoa4xl2pF2XkbptmQ_zaif8mhr',
+  );
 
   static bool get isSupabaseConfigured =>
       supabaseUrl.isNotEmpty && supabasePublishableKey.isNotEmpty;

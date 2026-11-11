@@ -1,21 +1,24 @@
-import 'package:flutter/material.dart';
-
-/// Status tontonan pada watchlist.
+/// Status tontonan pada watchlist dengan urutan:
+/// Favorite, Ingin Ditonton, Sedang Ditonton, Selesai.
 enum WatchStatus {
-  planToWatch('plan_to_watch', 'Ingin Ditonton', Icons.schedule),
-  watching('watching', 'Sedang Ditonton', Icons.play_circle_outline),
-  completed('completed', 'Selesai', Icons.check_circle_outline),
-  dropped('dropped', 'Berhenti', Icons.cancel_outlined);
+  favorite('dropped', 'Favorite'),
+  planToWatch('plan_to_watch', 'Ingin Ditonton'),
+  watching('watching', 'Sedang Ditonton'),
+  completed('completed', 'Selesai');
 
-  const WatchStatus(this.dbValue, this.label, this.icon);
+  const WatchStatus(this.dbValue, this.label);
 
   /// Nilai yang disimpan di kolom `status` database.
   final String dbValue;
   final String label;
-  final IconData icon;
 
-  static WatchStatus fromDb(String? value) => WatchStatus.values.firstWhere(
-        (s) => s.dbValue == value,
-        orElse: () => WatchStatus.planToWatch,
-      );
+  static WatchStatus fromDb(String? value) {
+    if (value == 'favorite' || value == 'dropped') {
+      return WatchStatus.favorite;
+    }
+    return WatchStatus.values.firstWhere(
+      (s) => s.dbValue == value,
+      orElse: () => WatchStatus.planToWatch,
+    );
+  }
 }

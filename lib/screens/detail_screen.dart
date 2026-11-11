@@ -168,8 +168,6 @@ class _SavedWatchlistCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(item.status.icon, color: color, size: 18),
-              const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   item.status.label,

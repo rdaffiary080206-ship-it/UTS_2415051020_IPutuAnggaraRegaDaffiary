@@ -127,20 +127,6 @@ class HomeScreen extends StatelessWidget {
             letterSpacing: 2,
           ),
         ),
-        actions: [
-          if (provider.shows.isNotEmpty)
-            IconButton(
-              tooltip: 'Random Movie',
-              onPressed: () => _surpriseMe(context, provider.shows),
-              icon: const Icon(Icons.shuffle_rounded, color: AppColors.gold),
-            ),
-          if (onSeeAll != null)
-            IconButton(
-              tooltip: 'Cari di Katalog',
-              onPressed: onSeeAll,
-              icon: const Icon(Icons.search),
-            ),
-        ],
       ),
       body: provider.isLoading
           ? const LoadingStateView(message: 'Memuat katalog film & series...')
